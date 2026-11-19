@@ -7,7 +7,8 @@ const POINTS = [
   { name:"Sol çit at", kind:"AT", x:987, y:871, min:11, px:.125, py:.275 },
   { name:"Sol çit", kind:"DISPATCH", x:1012, y:921, min:4, px:.222, py:.425 },
   { name:"BF monu at", kind:"AT", x:1017, y:981, min:9, px:.365, py:.475 },
-  { name:"BF gate at", kind:"AT", x:1001, y:1038, min:11, px:.585, py:.480 },
+  { name:"BF gate at", kind:"AT", x:1001, y:1038, min:11, px:.575, py:.480 },
+  { name:"BF gate dispatch", kind:"DISPATCH", x:996, y:1045, min:6, px:.675, py:.385 },
   { name:"Orta çit", kind:"DISPATCH", x:1046, y:1007, min:4, px:.455, py:.665 },
   { name:"Karus giriş", kind:"DISPATCH", x:1101, y:991, min:6, px:.355, py:.875 },
   { name:"Ağaç altı", kind:"DISPATCH", x:972, y:1105, min:4, px:.745, py:.195 },
@@ -108,7 +109,7 @@ function App(){
       const end=next[p.name];
       if(end && end<=now){next[p.name]=null;lastWarnRef.current[p.name]=null;changed=true;}
       const remain=next[p.name] ? Math.ceil((next[p.name]-now)/1000) : null;
-      if(remain!==null && remain>0 && remain<=10 && lastWarnRef.current[p.name]!==next[p.name]){
+      if(remain!==null && remain>0 && remain<=20 && lastWarnRef.current[p.name]!==next[p.name]){
         lastWarnRef.current[p.name]=next[p.name];
         if(!mute) speak(p.name,p.kind);
       }
@@ -181,7 +182,7 @@ function speak(name,kind){
   if(!("speechSynthesis" in window)) return;
   const clean=name.toLocaleLowerCase("tr-TR").endsWith(" at")?name.slice(0,-3):name;
   const category=kind==="AT"?"at":"dispatch";
-  const utterance=new SpeechSynthesisUtterance(`${clean} ${category}, çıkışa 10 saniye!`);
+  const utterance=new SpeechSynthesisUtterance(`${clean} ${category}, çıkışa 20 saniye!`);
   utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;
   const voices=window.speechSynthesis.getVoices();
   const tr=voices.filter(v=>v.lang.toLowerCase().startsWith("tr"));
