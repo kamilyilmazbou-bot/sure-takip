@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
 import "./style.css";
@@ -15,7 +15,6 @@ const POINTS = [
   { name:"Sağ çit at", kind:"AT", x:1039, y:1100, min:9, px:.820, py:.695 }
 ];
 const MONU = { px:.465, py:.435 };
-const COLORS = { AT:"#238653", DISPATCH:"#3979b9" };
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = SUPABASE_URL && SUPABASE_ANON ? createClient(SUPABASE_URL, SUPABASE_ANON) : null;
@@ -28,6 +27,7 @@ function App(){
   const [room,setRoom] = useState("");
   const [mode,setMode] = useState("map");
   const [mute,setMute] = useState(false);
+  const [darkMode,setDarkMode] = useState(() => localStorage.getItem("saha-dark-mode") === "true");
   const [state,setState] = useState(freshState);
   const [now,setNow] = useState(Date.now());
   const [status,setStatus] = useState("");
@@ -36,6 +36,11 @@ function App(){
   const lastWarnRef = useRef({});
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+    localStorage.setItem("saha-dark-mode", String(darkMode));
+  }, [darkMode]);
 
   const save = async next => {
     setState(next); stateRef.current=next;
@@ -84,8 +89,7 @@ function App(){
         if(!r.ok) return;
         const data=await r.json();
         if(alive && data.state){
-          const remote= data.state;
-          // Son güncellemesi gelen oda verisini esas al.
+          const remote=data.state;
           setState(remote);stateRef.current=remote;
         }
       }catch{}
@@ -117,7 +121,6 @@ function App(){
     const next={...stateRef.current,[name]:Date.now()+p.min*60000};
     lastWarnRef.current[name]=null;
     save(next);
-    // KESTİM tıklaması tarayıcının ses oynatma iznini de etkinleştirir.
     if(!mute) { try { window.speechSynthesis?.resume(); } catch{} }
   };
 
@@ -129,6 +132,7 @@ function App(){
     <p>Aynı oda kodunu giren herkes aynı sayaçları görür.</p>
     <form onSubmit={joinRoom}><label>Oda kodu</label><input value={roomInput} onChange={e=>setRoomInput(e.target.value.toUpperCase())} placeholder="ÖRN: KARUS-01" maxLength={24}/><button disabled={busy}>{busy?"Bağlanıyor…":"Odaya gir"}</button></form>
     <small>{status || "Oda kodunu ekibinle paylaş."}</small>
+    <label className="join-theme-toggle"><input type="checkbox" checked={darkMode} onChange={e=>setDarkMode(e.target.checked)}/> Dark Mode</label>
   </section></main>;
 
   return <div className="app-shell">
@@ -136,6 +140,7 @@ function App(){
       <div className="title">SAHA SÜRE TAKİP</div>
       <div className="legend"><span className="at-dot"/> AT <span className="dispatch-mark">|</span> DISPATCH</div>
       <div className="top-actions">
+        <label className="check"><input type="checkbox" checked={darkMode} onChange={e=>setDarkMode(e.target.checked)}/> Dark Mode</label>
         <label className="check"><input type="checkbox" checked={mute} onChange={e=>setMute(e.target.checked)}/> Sesli komutu kapat</label>
         <button className="quiet" onClick={resetAll}>Sıfırla</button>
         <div className="mode-switch"><button className={mode==="map"?"selected":""} onClick={()=>setMode("map")}>Harita</button><button className={mode==="list"?"selected":""} onClick={()=>setMode("list")}>2. Mod</button></div>
