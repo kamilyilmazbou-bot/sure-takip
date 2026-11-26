@@ -138,13 +138,13 @@ function App(){
         "1":"Sol çit at",
         "2":"Sol çit",
         "3":"BF monu at",
-        "4":"BF gate at",
-        "5":"BF gate dispatch",
-        "6":"Orta çit",
-        "7":"Karus giriş",
+        "4":"Karus giriş",
+        "5":"Orta çit",
+        "6":"BF gate at",
+        "7":"BF gate dispatch",
         "8":"Karus felo tepe",
-        "9":"Sağ çit at",
-        "0":"Ağaç altı"
+        "9":"Ağaç altı",
+        "0":"Sağ çit at"
       };
       const pointName=numberToName[e.key];
       if(!pointName) return;
@@ -187,7 +187,7 @@ function App(){
         {POINTS.map(p=>{
           const end=state[p.name], remain=end?Math.max(0,Math.ceil((end-now)/1000)):p.min*60;
           return <div key={p.name} className="map-point" style={{left:`${p.px*100}%`,top:`${p.py*100}%`}}>
-            <div className="point-head"><span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:18,height:18,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:4}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "BF gate at":"4", "BF gate dispatch":"5", "Orta çit":"6", "Karus giriş":"7", "Karus felo tepe":"8", "Sağ çit at":"9", "Ağaç altı":"0" }[p.name])}</span><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name}</b></div>
+            <div className="point-head"><span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:18,height:18,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:4}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "Karus giriş":"4", "Orta çit":"5", "BF gate at":"6", "BF gate dispatch":"7", "Karus felo tepe":"8", "Ağaç altı":"9", "Sağ çit at":"0" }[p.name])}</span><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name}</b></div>
             <div className="point-meta">({p.x}, {p.y})</div>
             <div className={`timer ${remain<=60 && end?"urgent":""}`}>{fmt(remain)}</div>
             <button className={`cut-btn ${p.kind.toLowerCase()}`} onClick={()=>startTimer(p.name)}>KESTİM</button>
@@ -197,7 +197,7 @@ function App(){
     </section> : <section className="list-area">
       <div className="list-heading"><span>KONUM</span><span>SÜRE</span><span>İŞLEM</span></div>
       {POINTS.map(p=>{const end=state[p.name],remain=end?Math.max(0,Math.ceil((end-now)/1000)):p.min*60;return <div className="list-row" key={p.name}>
-        <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:20,height:20,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:6}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "BF gate at":"4", "BF gate dispatch":"5", "Orta çit":"6", "Karus giriş":"7", "Karus felo tepe":"8", "Sağ çit at":"9", "Ağaç altı":"0" }[p.name])}</span><span className={`symbol ${p.kind.toLowerCase()}`}>{p.kind==="AT"?"●":"|"}</span>
+        <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:20,height:20,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:6}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "Karus giriş":"4", "Orta çit":"5", "BF gate at":"6", "BF gate dispatch":"7", "Karus felo tepe":"8", "Ağaç altı":"9", "Sağ çit at":"0" }[p.name])}</span><span className={`symbol ${p.kind.toLowerCase()}`}>{p.kind==="AT"?"●":"|"}</span>
         <div className="list-name"><b>{p.name}</b><small>({p.x}, {p.y})</small></div>
         <strong className={`list-time ${remain<=60&&end?"urgent":""}`}>{fmt(remain)}</strong>
         <button className={`cut-btn ${p.kind.toLowerCase()}`} onClick={()=>startTimer(p.name)}>KESTİM</button>
