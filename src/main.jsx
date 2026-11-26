@@ -28,6 +28,10 @@ function App(){
   const [room,setRoom] = useState("");
   const [mode,setMode] = useState("map");
   const [mute,setMute] = useState(false);
+  const [voiceVolume,setVoiceVolume] = useState(() => {
+    const saved=Number(localStorage.getItem("saha-voice-volume"));
+    return Number.isFinite(saved) && saved>=0 && saved<=1 ? saved : 0.8;
+  });
   const [darkMode,setDarkMode] = useState(() => localStorage.getItem("saha-dark-mode") === "true");
   const [state,setState] = useState(freshState);
   const [now,setNow] = useState(Date.now());
@@ -42,6 +46,10 @@ function App(){
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
     localStorage.setItem("saha-dark-mode", String(darkMode));
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem("saha-voice-volume", String(voiceVolume));
+  }, [voiceVolume]);
 
   const save = async next => {
     setState(next); stateRef.current=next;
@@ -111,11 +119,11 @@ function App(){
       const remain=next[p.name] ? Math.ceil((next[p.name]-now)/1000) : null;
       if(remain!==null && remain>0 && remain<=20 && lastWarnRef.current[p.name]!==next[p.name]){
         lastWarnRef.current[p.name]=next[p.name];
-        if(!mute) speak(p.name,p.kind);
+        if(!mute) speak(p.name,p.kind,voiceVolume);
       }
     }
     if(changed) save(next);
-  },[now,room,mute]);
+  },[now,room,mute,voiceVolume]);
 
   const startTimer = name => {
     const p=POINTS.find(x=>x.name===name);
@@ -173,6 +181,11 @@ function App(){
       <div className="top-actions">
         <label className="check"><input type="checkbox" checked={darkMode} onChange={e=>setDarkMode(e.target.checked)}/> Dark Mode</label>
         <label className="check"><input type="checkbox" checked={mute} onChange={e=>setMute(e.target.checked)}/> Sesli komutu kapat</label>
+        <label className="check" style={{display:"inline-flex",alignItems:"center",gap:6}}>
+          Ses
+          <input aria-label="Ses seviyesi" type="range" min="0" max="1" step="0.05" value={voiceVolume} onChange={e=>setVoiceVolume(Number(e.target.value))} style={{width:90,accentColor:"#3b82c4"}}/>
+          <span style={{minWidth:32}}>{Math.round(voiceVolume*100)}%</span>
+        </label>
         <button className="quiet" onClick={resetAll}>Sıfırla</button>
         <div className="mode-switch"><button className={mode==="map"?"selected":""} onClick={()=>setMode("map")}>Harita</button><button className={mode==="list"?"selected":""} onClick={()=>setMode("list")}>2. Mod</button></div>
       </div>
@@ -208,12 +221,12 @@ function App(){
   </div>;
 }
 
-function speak(name,kind){
+function speak(name,kind,volume=0.8){
   if(!("speechSynthesis" in window)) return;
   const clean=name.toLocaleLowerCase("tr-TR").endsWith(" at")?name.slice(0,-3):name;
   const category=kind==="AT"?"at":"dispatch";
   const utterance=new SpeechSynthesisUtterance(`${clean} ${category}, çıkışa 20 saniye!`);
-  utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;
+  utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;utterance.volume=Math.max(0,Math.min(1,volume));
   const voices=window.speechSynthesis.getVoices();
   const tr=voices.filter(v=>v.lang.toLowerCase().startsWith("tr"));
   const female=tr.find(v=>/female| kadın|emel|filiz|female/i.test(v.name));
