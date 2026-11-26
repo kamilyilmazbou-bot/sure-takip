@@ -201,7 +201,7 @@ function App(){
         {POINTS.map(p=>{
           const end=state[p.name], remain=end?Math.max(0,Math.ceil((end-now)/1000)):p.min*60;
           return <div key={p.name} className="map-point" style={{left:`${p.px*100}%`,top:`${p.py*100}%`}}>
-            <div className="point-head"><span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:18,height:18,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:4}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "Karus giriş":"4", "Orta çit":"5", "BF gate at":"6", "BF gate dispatch":"7", "Karus felo tepe":"8", "Ağaç altı":"9", "Sağ çit at":"0" }[p.name])}</span><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name}</b></div>
+            <div className="point-head"><span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:18,height:18,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:4}}>{({ "Sol çit at":"1", "Sol çit":"2", "BF monu at":"3", "Karus giriş":"4", "Orta çit":"5", "BF gate at":"6", "BF gate dispatch":"7", "Karus felo tepe":"8", "Ağaç altı":"9", "Sağ çit at":"0" }[p.name])}</span><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name==="BF gate dispatch"?"BF gate":p.name}</b></div>
             <div className="point-meta">({p.x}, {p.y})</div>
             <div className={`timer ${remain<=60 && end?"urgent":""}`}>{fmt(remain)}</div>
             <button className={`cut-btn ${p.kind.toLowerCase()}`} onClick={()=>startTimer(p.name)}>KESTİM</button>
@@ -251,7 +251,8 @@ function speak(name,kind,volume=0.8){
     clean=clean.slice(0,-9).trim();
   }
   const category=kind==="AT"?"at":"dispatch";
-  const utterance=new SpeechSynthesisUtterance(`${clean} ${category}, çıkışa 20 saniye!`);
+  const message=name==="BF gate dispatch" ? "BF gate dispatch, yirmi saniye!" : `${clean} ${category}, çıkışa 20 saniye!`;
+  const utterance=new SpeechSynthesisUtterance(message);
   utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;utterance.volume=Math.max(0,Math.min(1,volume));
   const voices=window.speechSynthesis.getVoices();
   const tr=voices.filter(v=>v.lang.toLowerCase().startsWith("tr"));
