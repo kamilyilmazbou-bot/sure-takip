@@ -127,6 +127,7 @@ function App(){
 
   const startTimer = name => {
     const p=POINTS.find(x=>x.name===name);
+    playKeyTone(voiceVolume);
     const next={...stateRef.current,[name]:Date.now()+p.min*60000};
     lastWarnRef.current[name]=null;
     save(next);
@@ -157,7 +158,6 @@ function App(){
       const pointName=numberToName[e.key];
       if(!pointName) return;
       e.preventDefault();
-      playKeyTone(voiceVolume);
       startTimer(pointName);
     };
     window.addEventListener("keydown",onKeyDown);
