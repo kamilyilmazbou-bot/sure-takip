@@ -125,6 +125,25 @@ function App(){
     if(!mute) { try { window.speechSynthesis?.resume(); } catch{} }
   };
 
+  // 1-9 select points 1-9; 0 selects point 10.
+  useEffect(()=>{
+    if(!room) return;
+    const onKeyDown = e => {
+      if(e.ctrlKey || e.altKey || e.metaKey || e.repeat) return;
+      const target=e.target;
+      const tag=target?.tagName?.toLowerCase();
+      if(tag==="input" || tag==="textarea" || tag==="select" || target?.isContentEditable) return;
+      if(!/^[0-9]$/.test(e.key)) return;
+      const index=e.key==="0" ? 9 : Number(e.key)-1;
+      const point=POINTS[index];
+      if(!point) return;
+      e.preventDefault();
+      startTimer(point.name);
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return()=>window.removeEventListener("keydown",onKeyDown);
+  },[room, mute]);
+
   const resetAll=()=>{lastWarnRef.current={};save(freshState());};
   const leave=()=>{setRoom("");setState(freshState());localStorage.removeItem("saha-room");setStatus("");};
 
@@ -157,7 +176,7 @@ function App(){
         {POINTS.map(p=>{
           const end=state[p.name], remain=end?Math.max(0,Math.ceil((end-now)/1000)):p.min*60;
           return <div key={p.name} className="map-point" style={{left:`${p.px*100}%`,top:`${p.py*100}%`}}>
-            <div className="point-head"><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name}</b></div>
+            <div className="point-head"><span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:18,height:18,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:4}}>{POINTS.indexOf(p)===9?"0":POINTS.indexOf(p)+1}</span><span className={p.kind==="AT"?"at-dot big":"dispatch-mark big"}>{p.kind==="DISPATCH"?"|":""}</span><b>{p.name}</b></div>
             <div className="point-meta">({p.x}, {p.y})</div>
             <div className={`timer ${remain<=60 && end?"urgent":""}`}>{fmt(remain)}</div>
             <button className={`cut-btn ${p.kind.toLowerCase()}`} onClick={()=>startTimer(p.name)}>KESTİM</button>
@@ -167,7 +186,7 @@ function App(){
     </section> : <section className="list-area">
       <div className="list-heading"><span>KONUM</span><span>SÜRE</span><span>İŞLEM</span></div>
       {POINTS.map(p=>{const end=state[p.name],remain=end?Math.max(0,Math.ceil((end-now)/1000)):p.min*60;return <div className="list-row" key={p.name}>
-        <span className={`symbol ${p.kind.toLowerCase()}`}>{p.kind==="AT"?"●":"|"}</span>
+        <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:20,height:20,borderRadius:5,background:"#d7e8f5",color:"#10212b",fontWeight:900,fontSize:11,marginRight:6}}>{POINTS.indexOf(p)===9?"0":POINTS.indexOf(p)+1}</span><span className={`symbol ${p.kind.toLowerCase()}`}>{p.kind==="AT"?"●":"|"}</span>
         <div className="list-name"><b>{p.name}</b><small>({p.x}, {p.y})</small></div>
         <strong className={`list-time ${remain<=60&&end?"urgent":""}`}>{fmt(remain)}</strong>
         <button className={`cut-btn ${p.kind.toLowerCase()}`} onClick={()=>startTimer(p.name)}>KESTİM</button>
