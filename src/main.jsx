@@ -245,20 +245,23 @@ function playKeyTone(volume=0.8){
 }
 
 function speak(name,kind,volume=0.8){
-  if(!("speechSynthesis" in window)) return;
-  let clean=name.toLocaleLowerCase("tr-TR").endsWith(" at")?name.slice(0,-3):name;
-  if(kind==="DISPATCH" && clean.toLocaleLowerCase("tr-TR").endsWith(" dispatch")) {
-    clean=clean.slice(0,-9).trim();
-  }
-  const category=kind==="AT"?"at":"dispatch";
-  const message=name==="BF gate dispatch" ? "BF gate dispatch, yirmi saniye!" : `${clean} ${category}, çıkışa 20 saniye!`;
-  const utterance=new SpeechSynthesisUtterance(message);
-  utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;utterance.volume=Math.max(0,Math.min(1,volume));
-  const voices=window.speechSynthesis.getVoices();
-  const tr=voices.filter(v=>v.lang.toLowerCase().startsWith("tr"));
-  const female=tr.find(v=>/female| kadın|emel|filiz|female/i.test(v.name));
-  if(female || tr[0]) utterance.voice=female||tr[0];
-  window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);
+  const recordingByPoint = {
+    "Sol çit at": "1.mp3",
+    "Sol çit": "2.mp3",
+    "BF monu at": "3.mp3",
+    "Karus giriş": "4.mp3",
+    "Orta çit": "5.mp3",
+    "BF gate at": "6.mp3",
+    "BF gate dispatch": "7.mp3",
+    "Karus felo tepe": "8.mp3",
+    "Ağaç altı": "9.mp3",
+    "Sağ çit at": "0.mp3"
+  };
+  const file=recordingByPoint[name];
+  if(!file) return;
+  const audio=new Audio(`/audio/${file}`);
+  audio.volume=Math.max(0,Math.min(1,volume));
+  audio.play().catch(()=>{});
 }
 
 createRoot(document.getElementById("root")).render(<App/>);
