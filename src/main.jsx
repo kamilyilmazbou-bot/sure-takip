@@ -157,6 +157,7 @@ function App(){
       const pointName=numberToName[e.key];
       if(!pointName) return;
       e.preventDefault();
+      playKeyTone(voiceVolume);
       startTimer(pointName);
     };
     window.addEventListener("keydown",onKeyDown);
@@ -221,9 +222,34 @@ function App(){
   </div>;
 }
 
+function playKeyTone(volume=0.8){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx) return;
+    const ctx=new AudioCtx();
+    const gain=ctx.createGain();
+    gain.gain.setValueAtTime(Math.max(0.001,Math.min(1,volume))*0.22,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
+    gain.connect(ctx.destination);
+    [880,1175].forEach((frequency,index)=>{
+      const osc=ctx.createOscillator();
+      const start=ctx.currentTime+index*0.09;
+      osc.type="sine";
+      osc.frequency.setValueAtTime(frequency,start);
+      osc.connect(gain);
+      osc.start(start);
+      osc.stop(start+0.12);
+    });
+    window.setTimeout(()=>ctx.close(),400);
+  }catch{}
+}
+
 function speak(name,kind,volume=0.8){
   if(!("speechSynthesis" in window)) return;
-  const clean=name.toLocaleLowerCase("tr-TR").endsWith(" at")?name.slice(0,-3):name;
+  let clean=name.toLocaleLowerCase("tr-TR").endsWith(" at")?name.slice(0,-3):name;
+  if(kind==="DISPATCH" && clean.toLocaleLowerCase("tr-TR").endsWith(" dispatch")) {
+    clean=clean.slice(0,-9).trim();
+  }
   const category=kind==="AT"?"at":"dispatch";
   const utterance=new SpeechSynthesisUtterance(`${clean} ${category}, çıkışa 20 saniye!`);
   utterance.lang="tr-TR";utterance.rate=1;utterance.pitch=1.05;utterance.volume=Math.max(0,Math.min(1,volume));
